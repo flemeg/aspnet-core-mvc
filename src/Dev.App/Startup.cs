@@ -21,9 +21,20 @@ namespace Dev.App
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IHostEnvironment hostEnvironment)
         {
-            Configuration = configuration;
+            var builder = new ConfigurationBuilder()
+               .SetBasePath(hostEnvironment.ContentRootPath)
+               .AddJsonFile("appsettings.json", true, true)
+               .AddJsonFile($"appsettings.{hostEnvironment.EnvironmentName}.json", true, true)
+               .AddEnvironmentVariables();
+
+            if (hostEnvironment.IsDevelopment())
+            {
+                builder.AddUserSecrets<Startup>();
+            }
+
+            Configuration = builder.Build();
         }
 
         public IConfiguration Configuration { get; }
@@ -31,15 +42,10 @@ namespace Dev.App
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection")));
+            services.AddIdentityConfiguration(Configuration);
 
             services.AddDbContext<DevDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-
-            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<ApplicationDbContext>();
 
             services.AddControllersWithViews();
 
@@ -49,17 +55,7 @@ namespace Dev.App
 
             services.AddMvcConfiguration();
 
-            // ResolveDependencies()
-            services.AddScoped<DevDbContext>();
-            services.AddScoped<IProdutoRepository, ProdutoRepository>();
-            services.AddScoped<IFornecedorRepository, FornecedorRepository>();
-            services.AddScoped<IEnderecoRepository, EnderecoRepository>();
-
-            services.AddSingleton<IValidationAttributeAdapterProvider, MoedaValidationAttributeAdapterProvider>();
-
-            services.AddScoped<INotificador, Notificador>();
-            services.AddScoped<IFornecedorService, FornecedorService>();
-            services.AddScoped<IProdutoService, ProdutoService>();
+            services.ResolveDependencies();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
