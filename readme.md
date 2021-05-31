@@ -21,4 +21,6 @@ Here are some stuff used in this project .
 - Migrations
 - Repository Pattern
 - Fluent Validation.
+- EF Core
+- Fluent API
 - AutoMapper

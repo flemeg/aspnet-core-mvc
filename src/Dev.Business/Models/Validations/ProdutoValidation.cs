@@ -16,6 +16,9 @@ namespace Dev.Business.Models.Validations
 
             RuleFor(c => c.Valor)
                 .GreaterThan(0).WithMessage("O campo {PropertyName} precisa ser maior que {ComparisonValue}");
+
+            RuleFor(c => c.Imagem)
+                .Length(5, 100).WithMessage("O nome completo do aquivo de ter entre 5 e 100 caracteres");
         }
     }
 
